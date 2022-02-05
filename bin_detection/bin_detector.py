@@ -9,7 +9,8 @@ import cv2
 import random
 import pdb
 from matplotlib import pyplot as plt
-from skimage.measure import label, regionprops
+import skimage.measure as skm
+# from skimage.measure import label, regionprops
 PATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PATH)
 from logistic2 import Logistic
@@ -23,7 +24,7 @@ class BinDetector():
 		Initilize your bin detector with the attributes you need,
 		e.g., parameters of your classifier
 		"""
-        
+		
 		self.color_space = cv2.COLOR_BGR2RGB
 		self.model = Logistic()
 		
@@ -52,24 +53,6 @@ class BinDetector():
 		self.model.fit(training_set, training_label)
 		self.model.save_param()
 
-		# selected_img = np.unique(img, axis=0)
-		# print(selected_img.shape)
-		# print(selected_img)
-		# for filename in os.listdir(file_path):
-		# 	layers = np.load(os.path.join(folder_path, filename))
-		# 	img_name = os.path.splitext(filename)[0] + ".jpg"
-		# 	img = cv2.imread(os.path.join(folder_path, img_name))
-		# 	img = cv2.cvtColor(img, self.color_space)
-		# 	img = img.reshape([-1, 3])
-		# 	layers = np.reshape(layers, (layers.shape[0], -1))
-		# 	for layer_id in range(layers.shape[0]):
-		# 		mask = layers[layer_id, :]
-		# 		if np.sum(mask) > PIXEL_PER_IMG[layer_id]:
-		# 			pixel_index = np.nonzero(mask)[0]
-		# 			pixel_index = np.random.choice(pixel_index, size=(PIXEL_PER_IMG[layer_id], ), replace=False)
-		# 			pixel_list.append(img[:, pixel_index])
-		# 			label_list.append(np.ones(len(pixel_index)) * layer_id)
-
 
 	def segment_image(self, img):
 		'''
@@ -90,26 +73,11 @@ class BinDetector():
 		pixels = img.reshape([-1, 3])
 		label = self.model.predict(pixels)
 		mask_img = np.reshape(label == 0, (img.shape[0], img.shape[1]))
-		smoothed_mask = np.zeros_like(mask_img)
-		# print('this is the masked output we obtain')
-
-		# Smoothing
-		for i in range(1, img.shape[0]-1):
-			for j in range(1, img.shape[1]-1):
-				if np.sum(mask_img[(i-1):(i+2), (j-1):(j+2)]) > 4:
-					smoothed_mask[i, j] = 1
-		mask_img = smoothed_mask
-		# plt.imshow(smoothed_mask)
-		# plt.show()
-		# pdb.set_trace()
-		# YOUR CODE BEFORE THIS LINE
-		################################################################
 		return mask_img
 
 		# Replace this with your own approach 
 		# YOUR CODE BEFORE THIS LINE
 		################################################################
-		return mask_img
 
 	def get_bounding_boxes(self, img):
 		'''
@@ -122,22 +90,33 @@ class BinDetector():
 				boxes - a list of lists of bounding boxes. Each nested list is a bounding box in the form of [x1, y1, x2, y2] 
 				where (x1, y1) and (x2, y2) are the top left and bottom right coordinate respectively
 		'''
-		################################################################
-		# YOUR CODE AFTER THIS LINE
-		label_mask = label(img)
-		regions = regionprops(label_mask)
 		boxes = []
-		total_area = img.shape[0] * img.shape[1]
-		for r in regions:
-			if 0.05*total_area < r.area < 0.6 * total_area:
-				boxes.append([r.bbox[1], r.bbox[0], r.bbox[3], r.bbox[2]])
+		total_size = img.shape[0] * img.shape[1]
+		img = img * 255
+		cv2.imwrite('mask.png', img)
+		img = cv2.imread('mask.png')
+		img2 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-		# Replace this with your own approach 
-		# x = np.sort(np.random.randint(img.shape[0], size=2)).tolist()
-		# y = np.sort(np.random.randint(img.shape[1], size=2)).tolist()
-		# boxes = [[x[0], y[0], x[1], y[1]]]
-		# boxes = [[182, 101, 313, 295]]
+		kernel = np.ones((8,8), np.uint8)
+		erode = cv2.erode(img2, kernel, iterations = 1)
+		dilation = cv2.dilate(erode, kernel[:5,:5], iterations = 3)
+		img2 = cv2.GaussianBlur(dilation, (3,3),0)
+
+		ret, thresh = cv2.threshold(img2, 1, 255, cv2.THRESH_OTSU)
+		contours, heirarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for c in contours:
+			approx = cv2.approxPolyDP(c, 0.01*cv2.arcLength(c, True), True)
+			M = cv2.moments(c)
+			if M['m00'] != 0:
+				x = int(M['m10']/M['m00'])
+				y = int(M['m01']/M['m00'])
+			if len(approx) == 4 or 5 or 6 or 7:
+				x, y, w, h = cv2.boundingRect(c)
+				# if x != 0 and y != 0 and w != img.shape[1] and h != img.shape[0]:
+				if 0.05 * total_size < w * h < 0.3 * total_size and 0.2 < h/w < 4:
+					boxes.append([x, y, x+w, y+h])
 		return boxes
+
 
 	def load_param(self):
 		w_path = os.path.join(dir_path, 'ww.npy')
@@ -146,7 +125,6 @@ class BinDetector():
 		self.model.b = np.load(b_path)
 		# self.model.param = {'w': self.w, 'b': self.b}
 		print('parameter loaded！')
-
 
 
 if __name__ == "__main__":
@@ -165,14 +143,14 @@ if __name__ == "__main__":
 			img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 			# display the labeled region and the image mask
 			fig, (ax1, ax2) = plt.subplots(1, 2)
-			fig.suptitle('%d pixels selected\n' % img[mask,:].shape[0])
-			from matplotlib import patches
-			if len(bbox):
-				bbox = bbox[0]
-				bbox_start = bbox[0:2]
-				bbox_size = [bbox[2]-bbox[0], bbox[3]-bbox[1]]
-				rect = patches.Rectangle(bbox_start, bbox_size[0], bbox_size[1], linewidth=1, edgecolor='r', facecolor='none')
-				ax1.add_patch(rect)
-			ax1.imshow(img)
-			ax2.imshow(mask)
-			plt.show(block=True)
+			# fig.suptitle('%d pixels selected\n' % img[mask,:].shape[0])
+			# from matplotlib import patches
+			# if len(bbox):
+			# 	bbox = bbox[0]
+			# 	bbox_start = bbox[0:2]
+			# 	bbox_size = [bbox[2]-bbox[0], bbox[3]-bbox[1]]
+			# 	rect = patches.Rectangle(bbox_start, bbox_size[0], bbox_size[1], linewidth=1, edgecolor='r', facecolor='none')
+			# 	ax1.add_patch(rect)
+			# ax1.imshow(img)
+			# ax2.imshow(mask)
+			# plt.show(block=True)
