@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # print(y[600:620])
 
     # red  1352
-    # grenn 1199
+    # green 1199
     # blue 1143
 
 

@@ -12,21 +12,21 @@ if __name__ == '__main__':
     folder = 'data/validation/blue'
 
     X = read_pixels(folder)
-    myPixelClassifier = PixelClassifier(X)
+    myPixelClassifier = PixelClassifier()
     myPixelClassifier.load_param()
     y = myPixelClassifier.classify(X)
     print('Precision of blue: %f' % (sum(y == 3) / y.shape[0]))
 
-    folder = 'data/validation/green'
-    X = read_pixels(folder)
-    myPixelClassifier = PixelClassifier(X)
-    myPixelClassifier.load_param()
-    y = myPixelClassifier.classify(X)
-    print('Precision of green: %f' % (sum(y == 2) / y.shape[0]))
-
-    folder = 'data/validation/red'
-    X = read_pixels(folder)
-    myPixelClassifier = PixelClassifier(X)
-    myPixelClassifier.load_param()
-    y = myPixelClassifier.classify(X)
-    print('Precision of red: %f' % (sum(y == 1) / y.shape[0]))
+    # folder = 'data/validation/green'
+    # X = read_pixels(folder)
+    # myPixelClassifier = PixelClassifier()
+    # myPixelClassifier.load_param()
+    # y = myPixelClassifier.classify(X)
+    # print('Precision of green: %f' % (sum(y == 2) / y.shape[0]))
+    #
+    # folder = 'data/validation/red'
+    # X = read_pixels(folder)
+    # myPixelClassifier = PixelClassifier()
+    # myPixelClassifier.load_param()
+    # y = myPixelClassifier.classify(X)
+    # print('Precision of red: %f' % (sum(y == 1) / y.shape[0]))

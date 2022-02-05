@@ -10,13 +10,13 @@ import random
 import pdb
 from matplotlib import pyplot as plt
 import skimage.measure as skm
-# from skimage.measure import label, regionprops
 PATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PATH)
 from logistic2 import Logistic
+from skimage.measure import label, regionprops
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-print(dir_path)
+w_path = os.path.join(PATH, 'ww.npy')
+b_path = os.path.join(PATH, 'bb.npy')
 
 class BinDetector():
 	def __init__(self):
@@ -27,11 +27,8 @@ class BinDetector():
 		
 		self.color_space = cv2.COLOR_BGR2RGB
 		self.model = Logistic()
-		
-		w_path = os.path.join(dir_path, 'ww.npy')
-		b_path = os.path.join(dir_path, 'bb.npy')
 		if os.path.exists(w_path) and os.path.exists(b_path):
-			self.load_param()
+			self.model.load_param(w_path, b_path)
 		else:
 			print('parameter not found! start training...')
 			self.training()
@@ -43,15 +40,12 @@ class BinDetector():
 		print('parameter not found! start training...')
 		# folder_path = os.path.join(dir_path, 'training')
 
-		file_path = os.path.join(dir_path, 'data/selected_img.npy')
+		file_path = os.path.join(PATH, 'selected_img.npy')
 		img = np.load(file_path)
-		print('img loaded!', img[:3, :])
 		training_set = img[:, :3]
 		training_label = img[:, 3]
-		print('training set shape:', training_set.shape, 'training label shape:', training_label.shape)
-		
 		self.model.fit(training_set, training_label)
-		self.model.save_param()
+		self.model.save_param(w_path, b_path)
 
 
 	def segment_image(self, img):
@@ -118,14 +112,6 @@ class BinDetector():
 		return boxes
 
 
-	def load_param(self):
-		w_path = os.path.join(dir_path, 'ww.npy')
-		b_path = os.path.join(dir_path, 'bb.npy')
-		self.model.w = np.load(w_path)
-		self.model.b = np.load(b_path)
-		# self.model.param = {'w': self.w, 'b': self.b}
-		print('parameter loaded！')
-
 
 if __name__ == "__main__":
 	detector = BinDetector()
@@ -134,23 +120,23 @@ if __name__ == "__main__":
 	folder = './data/training'
 
 
-	for filename in os.listdir(folder):
-		if os.path.splitext(filename)[1] == ".jpg":
-			img = cv2.imread(os.path.join(folder,filename))
-			# get the image mask
-			mask = detector.segment_image(img)
-			bbox = detector.get_bounding_boxes(mask)
-			img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-			# display the labeled region and the image mask
-			fig, (ax1, ax2) = plt.subplots(1, 2)
-			# fig.suptitle('%d pixels selected\n' % img[mask,:].shape[0])
-			# from matplotlib import patches
-			# if len(bbox):
-			# 	bbox = bbox[0]
-			# 	bbox_start = bbox[0:2]
-			# 	bbox_size = [bbox[2]-bbox[0], bbox[3]-bbox[1]]
-			# 	rect = patches.Rectangle(bbox_start, bbox_size[0], bbox_size[1], linewidth=1, edgecolor='r', facecolor='none')
-			# 	ax1.add_patch(rect)
-			# ax1.imshow(img)
-			# ax2.imshow(mask)
-			# plt.show(block=True)
+	# for filename in os.listdir(folder):
+	# 	if os.path.splitext(filename)[1] == ".jpg":
+	# 		img = cv2.imread(os.path.join(folder,filename))
+	# 		# get the image mask
+	# 		mask = detector.segment_image(img)
+	# 		bbox = detector.get_bounding_boxes(mask)
+	# 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+	# 		# display the labeled region and the image mask
+	# 		fig, (ax1, ax2) = plt.subplots(1, 2)
+	# 		fig.suptitle('%d pixels selected\n' % img[mask,:].shape[0])
+	# 		# from matplotlib import patches
+	# 		# if len(bbox):
+	# 		# 	bbox = bbox[0]
+	# 		# 	bbox_start = bbox[0:2]
+	# 		# 	bbox_size = [bbox[2]-bbox[0], bbox[3]-bbox[1]]
+	# 		# 	rect = patches.Rectangle(bbox_start, bbox_size[0], bbox_size[1], linewidth=1, edgecolor='r', facecolor='none')
+	# 		# 	ax1.add_patch(rect)
+	# 		# ax1.imshow(img)
+	# 		# ax2.imshow(mask)
+	# 		plt.show()

@@ -81,15 +81,13 @@ class Logistic():
     def calc_accuracy(self, X, y):
         return np.mean(self.predict(X) == y)
 
-    def load_param(self):
-        self.w = np.load('w.npy')
-        self.b = np.load('b.npy')
-        self.param = {'w': self.w, 'b': self.b}
-        print('parameter loaded！')
+    def load_param(self, w_path, b_path):
+        self.w = np.load(w_path)
+        self.b = np.load(b_path)
 
-    def save_param(self):
-        np.save('w.npy', self.w)
-        np.save('b.npy', self.b)
+    def save_param(self, w_path, b_path):
+        np.save(w_path, self.w)
+        np.save(b_path, self.b)
 
 
     def cross_entropy(self, y, probs):

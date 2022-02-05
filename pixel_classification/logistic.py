@@ -25,29 +25,15 @@ class Logistic():
             # Y_batch = self.one_hot(y_batch)
             # loss = self.cross_entropy(y_batch, self.pass_forward(X_batch))
             loss = self.cross_entropy(y, self.pass_forward(X))
-            # loss = self.cross_entropy(y, self.pass_forward(X))
-
             if i % 10 == 0:
                 print(loss)
-                # print('Cost at iteration %i: %f' % (i, loss.item()))
             self.loss_history.append(loss)
-            idx = np.random.choice(X.shape[0], batch_size)
-            # X_batch, y_batch = X[idx], y[idx]  # X_batch: batch_size x feature_size; y_batch: batch_size x 1
             Y = self.one_hot(y)
             error = Y - self.pass_forward(X)  # batch_size x 3
             self.w += lr * np.dot(X.T, error)
             self.b += lr * np.mean(error, axis=0)
-        self.save_param()
 
     def pass_forward(self, X):
-        # print(self.w.shape)
-        # print(X.shape)
-        # print(self.b.shape)
-        # output = np.dot(X, self.w) + self.b
-        # result = self.softmax(output)
-        # print(output.shape)
-        # print(result.shape)
-
         return self.softmax(np.dot(X, self.w) + self.b)
 
     def one_hot(self, y):
@@ -66,28 +52,23 @@ class Logistic():
          :return: n x 1 vector of with {1,2,3} values corresponding to {red, green, blue}, respectively
         """
         ################################################################
-        # YOUR CODE AFTER THIS LINE
-        # self.load_param()
         output = self.pass_forward(X)
         result = 1 + np.argmax(output, axis=1)
         return result
-
-        # y = 1 + np.random.randint(3, size=X.shape[0])
         ################################################################
-        # return y
 
     def calc_accuracy(self, X, y):
         return np.mean(self.predict(X) == y)
 
-    def load_param(self):
-        self.w = np.load('w.npy')
-        self.b = np.load('b.npy')
-        self.param = {'w': self.w, 'b': self.b}
-        print('parameter loaded！')
+    def load_param(self, w_path, b_path):
+        self.w = np.load(w_path)
+        self.b = np.load(b_path)
+        # self.param = {'w': self.w, 'b': self.b}
+        # print('parameter loaded！')
 
-    def save_param(self):
-        np.save('w.npy', self.w)
-        np.save('b.npy', self.b)
+    def save_param(self, w_path, b_path):
+        np.save(w_path, self.w)
+        np.save(b_path, self.b)
 
     def softmax(self, z):
         return np.exp(z) / np.sum(np.exp(z), axis=1).reshape(-1, 1)
