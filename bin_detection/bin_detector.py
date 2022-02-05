@@ -118,25 +118,3 @@ if __name__ == "__main__":
 	detector.load_param()
 	# folder = './data/validation'
 	folder = './data/training'
-
-
-	# for filename in os.listdir(folder):
-	# 	if os.path.splitext(filename)[1] == ".jpg":
-	# 		img = cv2.imread(os.path.join(folder,filename))
-	# 		# get the image mask
-	# 		mask = detector.segment_image(img)
-	# 		bbox = detector.get_bounding_boxes(mask)
-	# 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-	# 		# display the labeled region and the image mask
-	# 		fig, (ax1, ax2) = plt.subplots(1, 2)
-	# 		fig.suptitle('%d pixels selected\n' % img[mask,:].shape[0])
-	# 		# from matplotlib import patches
-	# 		# if len(bbox):
-	# 		# 	bbox = bbox[0]
-	# 		# 	bbox_start = bbox[0:2]
-	# 		# 	bbox_size = [bbox[2]-bbox[0], bbox[3]-bbox[1]]
-	# 		# 	rect = patches.Rectangle(bbox_start, bbox_size[0], bbox_size[1], linewidth=1, edgecolor='r', facecolor='none')
-	# 		# 	ax1.add_patch(rect)
-	# 		# ax1.imshow(img)
-	# 		# ax2.imshow(mask)
-	# 		plt.show()

@@ -18,13 +18,7 @@ class Logistic():
 
     def fit(self, X, y, lr=0.01):
         for i in range(self.iter):
-            # idx = np.random.choice(X.shape[0], batch_size)
-            # X_batch, y_batch = X[idx], y[idx]  # X_batch: batch_size x feature_size; y_batch: batch_size x 1
-            # Y_batch = self.one_hot(y_batch)
-            # loss = self.cross_entropy(y_batch, self.pass_forward(X_batch))
             loss = self.cross_entropy(y, self.pass_forward(X))
-            # loss = self.cross_entropy(y, self.pass_forward(X))
-            # print('iteration i: ',i)
             if i % 10 == 0:
                 print("loss: ", loss)
             self.loss_history.append(loss)
@@ -35,16 +29,8 @@ class Logistic():
         self.save_param()
 
     def pass_forward(self, X):
-        # print(self.w.shape)
-        # print(X.shape)
-        # print(self.b.shape)
-        output = np.dot(X, self.w) + self.b
-        assert np.isnan(output).any() == False, 'output contains nan'
-        result = self.softmax(output)
-        assert np.isnan(result).any() == False, 'result contains nan'
-        return result
-        # print(output.shape)
-        # print(result.shape)
+        output = self.softmax(np.dot(X, self.w) + self.b)
+        return output
 
     def softmax(self, z):
         return np.exp(z) / np.sum(np.exp(z), axis=1).reshape(-1, 1)
@@ -67,16 +53,10 @@ class Logistic():
          :return: n x 1 vector of with {1,2,3} values corresponding to {red, green, blue}, respectively
         """
         ################################################################
-        # YOUR CODE AFTER THIS LINE
-        # self.load_param()
         output = self.pass_forward(X)
-        # result = 1 + np.argmax(output, axis=1)
         result = np.argmax(output, axis=1)
         return result
-
-        # y = 1 + np.random.randint(3, size=X.shape[0])
         ################################################################
-        # return y
 
     def calc_accuracy(self, X, y):
         return np.mean(self.predict(X) == y)
@@ -91,12 +71,7 @@ class Logistic():
 
 
     def cross_entropy(self, y, probs):
-        # print(probs.shape)
-        # indx = np.argwhere(np.isnan(probs))
-        # print(indx)
-
         assert np.isnan(probs).any() == False, 'probs contains nan'
-        # return -1 * np.mean(y * np.log(probs))
         y = self.one_hot(y)
         return np.mean(np.sum(-y * np.log(probs), axis=1))
 

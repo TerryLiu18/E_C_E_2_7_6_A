@@ -20,10 +20,6 @@ class Logistic():
 
     def fit(self, X, y, batch_size=100, lr=0.01):
         for i in range(self.iter):
-            # idx = np.random.choice(X.shape[0], batch_size)
-            # X_batch, y_batch = X[idx], y[idx]  # X_batch: batch_size x feature_size; y_batch: batch_size x 1
-            # Y_batch = self.one_hot(y_batch)
-            # loss = self.cross_entropy(y_batch, self.pass_forward(X_batch))
             loss = self.cross_entropy(y, self.pass_forward(X))
             if i % 10 == 0:
                 print(loss)
@@ -63,8 +59,6 @@ class Logistic():
     def load_param(self, w_path, b_path):
         self.w = np.load(w_path)
         self.b = np.load(b_path)
-        # self.param = {'w': self.w, 'b': self.b}
-        # print('parameter loaded！')
 
     def save_param(self, w_path, b_path):
         np.save(w_path, self.w)
@@ -74,7 +68,6 @@ class Logistic():
         return np.exp(z) / np.sum(np.exp(z), axis=1).reshape(-1, 1)
 
     def cross_entropy(self, y, probs):
-        # return -1 * np.mean(y * np.log(probs))
         y = self.one_hot(y)
         return 100 * np.mean(np.sum(-y * np.log(probs), axis=1))
 
