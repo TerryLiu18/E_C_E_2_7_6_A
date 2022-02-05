@@ -9,4 +9,3 @@ If you would like to run the Autograder on your local machine, which is optional
 
 ```
 python3 run_tests.py
-```
